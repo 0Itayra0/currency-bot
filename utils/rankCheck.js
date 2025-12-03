@@ -1,40 +1,33 @@
-const ranks = require(..configranks);
+const ranks = require("../config/ranks");
 
-async function checkRank(client, guildId, userId, newVouches) {
+async function checkRank(client, guildId, userId, vouches) {
     const guild = client.guilds.cache.get(guildId);
     if (!guild) return;
 
-    const member = await guild.members.fetch(userId).catch(() = null);
+    const member = await guild.members.fetch(userId).catch(() => null);
     if (!member) return;
 
-     Find highest rank the user qualifies for
-    const eligibleRanks = ranks.filter(r = newVouches = r.required);
+    // Find the highest rank they qualify for
+    const newRank = ranks.find(r => vouches >= r.required);
 
-    const newRank = eligibleRanks[eligibleRanks.length - 1];  highest tier
-    if (!newRank) return;
+    // All role IDs from ranks
+    const rankRoleIds = ranks.map(r => r.id);
 
-     Check if user already has this rank
-    const hasRank = member.roles.cache.has(newRank.id);
+    // Remove ALL rank roles
+    await member.roles.remove(rankRoleIds).catch(() => {});
 
-     Remove all rank roles
-    const rankIds = ranks.map(r = r.id);
-    await member.roles.remove(rankIds).catch(() = {});
+    if (!newRank) {
+        // They don't qualify for any rank
+        return;
+    }
 
-     Apply new one
-    await member.roles.add(newRank.id).catch(() = {});
+    // Apply the new rank
+    await member.roles.add(newRank.id).catch(() => {});
 
-     ANNOUNCEMENT CHANNEL
-    const announce = client.channels.cache.get(process.env.RANK_ANNOUNCE_CHANNEL_ID);
-
-    if (!hasRank) {
-         Rank up or rank down message
-        if (announce) {
-            await announce.send(
-                newVouches = newRank.required
-                     `🏆 @${userId} has ranked up to ${newRank.name}! Congrats!`
-                     `📉 @${userId} has been demoted to ${newRank.name}.`
-            );
-        }
+    // Announce change
+    const channel = guild.channels.cache.get(process.env.RANK_ANNOUNCE_CHANNEL);
+    if (channel) {
+        channel.send(`🏆 <@${userId}> has reached **${newRank.name}** with **${vouches}** vouches!`);
     }
 }
 
