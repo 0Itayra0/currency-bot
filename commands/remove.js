@@ -47,7 +47,11 @@ module.exports = {
 		});
 
 
-        await interaction.reply(`🗑️ Removed **${amount} vouches** from **${target.tag}**.`);
+        await interaction.reply({
+            content: `🗑️ Removed **${amount} vouches** from **${target.tag}**.`,
+            flags: 64
+        });
+
 
         // 🔹 Log to staff channel
         await logToStaff(

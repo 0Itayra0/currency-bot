@@ -42,7 +42,11 @@ module.exports = {
 		});
 
 
-        await interaction.reply(`✅ Created **${amount} vouches** and gave them to **${user.tag}**.`);
+        await interaction.reply({
+            content: `✅ Created **${amount} vouches** and gave them to **${user.tag}**.`,
+            flags: 64
+        });
+
 
         // 🔹 Log to staff channel
         await logToStaff(
