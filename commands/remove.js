@@ -2,13 +2,7 @@ const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const User = require("../models/User");
 const { logToStaff } = require("../utils/log");
 const { checkRank } = require("../utils/rankCheck");
-
-dbUser.vouches -= amount;
-await dbUser.save();
-
-// Rank update
-checkRank(interaction.client, interaction.guild.id, target.id, dbUser.vouches);
-
+const Transaction = require("../models/Transaction");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -16,59 +10,53 @@ module.exports = {
         .setDescription("Remove vouches from a user (Admin only)")
         .addUserOption(opt =>
             opt.setName("user")
-                .setDescription("User to remove vouches from")
+                .setDescription("User to take vouches from")
                 .setRequired(true)
         )
         .addIntegerOption(opt =>
             opt.setName("amount")
-                .setDescription("Amount to remove")
+                .setDescription("Amount of vouches to remove")
                 .setRequired(true)
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
     async execute(interaction) {
-        const target = interaction.options.getUser("user");
+        const user = interaction.options.getUser("user");
         const amount = interaction.options.getInteger("amount");
 
         if (amount <= 0)
-            return interaction.reply({ content: "Amount must be positive.", flags: 64 });
+            return interaction.reply({ content: "❌ Amount must be positive.", flags: 64 });
 
-        let dbUser = await User.findOne({ userId: target.id });
-        if (!dbUser) dbUser = await User.create({ userId: target.id });
+        let dbUser = await User.findOne({ userId: user.id });
+        if (!dbUser) dbUser = await User.create({ userId: user.id });
 
-        if (dbUser.vouches < amount)
-            return interaction.reply({
-                content: "❌ User does not have that many vouches.",
-                flags: 64
-            });
-
-        dbUser.vouches -= amount;
+        dbUser.vouches = Math.max(0, dbUser.vouches - amount);
         await dbUser.save();
-		
-		const Transaction = require("../models/Transaction");
 
-		await Transaction.create({
-			type: "REMOVE",
-			senderId: interaction.user.id,
-			recipientId: target.id,
-			amount: amount
-		});
+        // Log transaction
+        await Transaction.create({
+            type: "REMOVE",
+            senderId: interaction.user.id,
+            recipientId: user.id,
+            amount
+        });
 
+        // Rank update
+        checkRank(interaction.client, interaction.guild.id, user.id, dbUser.vouches);
 
         await interaction.reply({
-            content: `🗑️ Removed **${amount} vouches** from **${target.tag}**.`,
+            content: `🧹 Removed **${amount}** vouches from **${user.tag}**.\nThey now have **${dbUser.vouches}**.`,
             flags: 64
         });
 
-
-        // 🔹 Log to staff channel
-        await logToStaff(
+        // Staff log
+        logToStaff(
             interaction.client,
-            `🗑️ **REMOVE**\n` +
+            `🧾 **REMOVE**\n` +
             `Admin: **${interaction.user.tag}** (\`${interaction.user.id}\`)\n` +
-            `Target: **${target.tag}** (\`${target.id}\`)\n` +
+            `Target: **${user.tag}** (\`${user.id}\`)\n` +
             `Amount: **${amount}**\n` +
-            `New balance: **${dbUser.vouches}**`
+            `New Balance: **${dbUser.vouches}**`
         );
     }
 };
