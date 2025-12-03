@@ -14,6 +14,9 @@ async function uploadBackupToDrive(filename, filepath) {
         const fileMetadata = {
             name: filename,
             parents: [process.env.GOOGLE_DRIVE_FOLDER_ID],
+            owners: [
+            { emailAddress: "kanadecdlarisvarsovec@gmail.com" }
+            ]   
         };
 
         const media = {
