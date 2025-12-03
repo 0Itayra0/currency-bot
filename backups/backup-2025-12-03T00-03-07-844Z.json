@@ -1,0 +1,59 @@
+{
+  "timestamp": "2025-12-03T00:03:07.843Z",
+  "users": [
+    {
+      "userId": "1332435177477243042",
+      "vouches": 0
+    },
+    {
+      "userId": "454589765468291072",
+      "vouches": 0
+    },
+    {
+      "userId": "1023573208655462402",
+      "vouches": 0
+    },
+    {
+      "userId": "448540187707047946",
+      "vouches": 0
+    },
+    {
+      "userId": "1445462634672685166",
+      "vouches": 0
+    },
+    {
+      "userId": "507375991342235648",
+      "vouches": 0
+    }
+  ],
+  "transactions": [
+    {
+      "type": "CREATE",
+      "senderId": "454589765468291072",
+      "recipientId": "454589765468291072",
+      "amount": 10,
+      "timestamp": "2025-12-02T23:44:57.942Z"
+    },
+    {
+      "type": "PAY",
+      "senderId": "454589765468291072",
+      "recipientId": "1445462634672685166",
+      "amount": 5,
+      "timestamp": "2025-12-02T23:45:10.049Z"
+    },
+    {
+      "type": "REMOVE",
+      "senderId": "454589765468291072",
+      "recipientId": "1445462634672685166",
+      "amount": 5,
+      "timestamp": "2025-12-02T23:45:40.553Z"
+    },
+    {
+      "type": "REMOVE",
+      "senderId": "454589765468291072",
+      "recipientId": "454589765468291072",
+      "amount": 5,
+      "timestamp": "2025-12-02T23:45:46.482Z"
+    }
+  ]
+}
