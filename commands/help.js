@@ -45,6 +45,7 @@ module.exports = {
             )
             .setFooter({ text: "If you need help, message the server staff" });
 
-        await interaction.reply({ embeds: [helpEmbed], ephemeral: true });
+        await interaction.reply({ embeds: [helpEmbed], flags: 64 });
+
     }
 };

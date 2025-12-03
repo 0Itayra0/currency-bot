@@ -23,7 +23,7 @@ module.exports = {
         const amount = interaction.options.getInteger("amount");
 
         if (amount <= 0)
-            return interaction.reply({ content: "Amount must be positive.", ephemeral: true });
+            return interaction.reply({ content: "Amount must be positive.", flags: 64 });
 
         let dbUser = await User.findOne({ userId: user.id });
         if (!dbUser) dbUser = await User.create({ userId: user.id });

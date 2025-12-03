@@ -65,7 +65,7 @@ client.on("interactionCreate", async interaction => {
         await command.execute(interaction);
     } catch (e) {
         console.error(e);
-        interaction.reply({ content: "❌ Error executing command", ephemeral: true });
+        interaction.reply({ content: "❌ Error executing command", flags: 64 });
     }
 });
 
@@ -87,7 +87,7 @@ client.on("interactionCreate", async interaction => {
     if (!session) {
         return interaction.reply({
             content: "❌ This payment session has expired.",
-            ephemeral: true
+            flags: 64
         });
     }
 

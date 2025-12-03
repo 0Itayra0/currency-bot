@@ -36,7 +36,7 @@ module.exports = {
         if (remaining) {
             return interaction.reply({
                 content: `⏳ Slow down! You can use **/pay** again in **${remaining}s**.`,
-                ephemeral: true
+                flags: 64
             });
         }
 
@@ -47,13 +47,13 @@ module.exports = {
         if (recipient.id === sender.id)
             return interaction.reply({
                 content: "You cannot pay yourself.",
-                ephemeral: true
+                flags: 64
             });
 
         if (amount <= 0)
             return interaction.reply({
                 content: "Amount must be positive.",
-                ephemeral: true
+                flags: 64
             });
 
         // Load sender data to verify balance BEFORE confirmation
@@ -63,7 +63,7 @@ module.exports = {
         if (senderDB.vouches < amount)
             return interaction.reply({
                 content: "❌ You don't have enough vouches for that payment.",
-                ephemeral: true
+                flags: 64
             });
 
         // Save temp session
@@ -93,7 +93,7 @@ module.exports = {
         await interaction.reply({
             embeds: [embed],
             components: [row],
-            ephemeral: true
+            flags: 64
         });
     }
 };

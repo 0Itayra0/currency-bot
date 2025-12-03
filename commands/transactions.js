@@ -19,7 +19,7 @@ module.exports = {
         if (!searchingSelf && !interaction.member.permissions.has("Administrator")) {
             return interaction.reply({
                 content: "❌ You can only view **your own** history.",
-                ephemeral: true
+                flags: 64
             });
         }
 
@@ -36,7 +36,7 @@ module.exports = {
         if (history.length === 0) {
             return interaction.reply({
                 content: `📭 No transactions found for **${target.tag}**.`,
-                ephemeral: true
+                flags: 64
             });
         }
 
@@ -71,6 +71,6 @@ module.exports = {
             .setColor("#00aaff")
             .setFooter({ text: "Showing latest 10 transactions" });
 
-        await interaction.reply({ embeds: [embed], ephemeral: true });
+        await interaction.reply({ embeds: [embed], flags: 64 });
     }
 };
