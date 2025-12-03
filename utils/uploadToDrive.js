@@ -1,4 +1,5 @@
 const { google } = require("googleapis");
+const fs = require("fs");
 
 async function uploadBackupToDrive(filename, filepath) {
     try {
@@ -6,31 +7,35 @@ async function uploadBackupToDrive(filename, filepath) {
 
         const auth = new google.auth.GoogleAuth({
             credentials,
-            scopes: ["https://www.googleapis.com/auth/drive.file"],
+            scopes: ["https://www.googleapis.com/auth/drive"],
         });
 
         const drive = google.drive({ version: "v3", auth });
 
+        // 1️⃣ Create an empty file in your Drive folder
         const fileMetadata = {
             name: filename,
-            parents: [process.env.GOOGLE_DRIVE_FOLDER_ID],
-            owners: [
-            { emailAddress: "kanadecdlarisvarsovec@gmail.com" }
-            ]   
+            parents: [process.env.GOOGLE_DRIVE_FOLDER_ID]
         };
 
-        const media = {
-            mimeType: "application/json",
-            body: require("fs").createReadStream(filepath),
-        };
-
-        const response = await drive.files.create({
+        const file = await drive.files.create({
             resource: fileMetadata,
-            media,
-            fields: "id",
+            fields: "id"
         });
 
-        console.log(`☁️ Backup uploaded to Drive (file ID: ${response.data.id})`);
+        const fileId = file.data.id;
+
+        // 2️⃣ Upload file content with MEDIA upload
+        await drive.files.update({
+            fileId: fileId,
+            media: {
+                mimeType: "application/json",
+                body: fs.createReadStream(filepath)
+            }
+        });
+
+        console.log(`☁️ Backup uploaded successfully! File ID: ${fileId}`);
+
     } catch (err) {
         console.error("❌ Google Drive upload failed:", err);
     }
