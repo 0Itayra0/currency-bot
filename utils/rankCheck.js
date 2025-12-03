@@ -7,27 +7,65 @@ async function checkRank(client, guildId, userId, vouches) {
     const member = await guild.members.fetch(userId).catch(() => null);
     if (!member) return;
 
-    // Find the highest rank they qualify for
+    const announceChannel = guild.channels.cache.get(process.env.RANK_ANNOUNCE_CHANNEL);
+
+    // Identify old rank (the one user currently has)
+    const oldRank = ranks.find(r => member.roles.cache.has(r.id));
+
+    // Determine new rank based on vouches
     const newRank = ranks.find(r => vouches >= r.required);
 
-    // All role IDs from ranks
-    const rankRoleIds = ranks.map(r => r.id);
+    // If nothing changes — skip all
+    if (oldRank && newRank && oldRank.id === newRank.id) return;
 
     // Remove ALL rank roles
-    await member.roles.remove(rankRoleIds).catch(() => {});
+    const allRankIds = ranks.map(r => r.id);
+    await member.roles.remove(allRankIds).catch(() => {});
 
-    if (!newRank) {
-        // They don't qualify for any rank
-        return;
+    // Assign new rank if one exists
+    if (newRank) {
+        await member.roles.add(newRank.id).catch(() => {});
     }
 
-    // Apply the new rank
-    await member.roles.add(newRank.id).catch(() => {});
+    // If no announce channel → stop here (no crash)
+    if (!announceChannel) return;
 
-    // Announce change
-    const channel = guild.channels.cache.get(process.env.RANK_ANNOUNCE_CHANNEL);
-    if (channel) {
-        channel.send(`🏆 <@${userId}> has reached **${newRank.name}** with **${vouches}** vouches!`);
+    // ------------------------------
+    // ANNOUNCEMENT LOGIC IMPROVED ❤️
+    // ------------------------------
+
+    // FIRST time ever getting a rank
+    if (!oldRank && newRank) {
+        return announceChannel.send(
+            `✨ **FIRST RANK UNLOCKED!** ✨\n` +
+            `Congratulations <@${userId}>! You’ve reached **${newRank.name}** with **${vouches}** vouches! 🎉`
+        );
+    }
+
+    // Lost ALL ranks (vouches too low)
+    if (oldRank && !newRank) {
+        return announceChannel.send(
+            `⚠️ <@${userId}> has dropped below **${ranks[ranks.length - 1].required}** vouches.\n` +
+            `They have **lost all rank roles**. 😢`
+        );
+    }
+
+    // RANK UP (old required < new required)
+    if (oldRank && newRank && oldRank.required < newRank.required) {
+        return announceChannel.send(
+            `🏆 **RANK UP!** 🏆\n` +
+            `<@${userId}> has been promoted from **${oldRank.name}** → **${newRank.name}**!\n` +
+            `They now have **${vouches}** vouches! 🎉🔥`
+        );
+    }
+
+    // RANK DOWN (old required > new required)
+    if (oldRank && newRank && oldRank.required > newRank.required) {
+        return announceChannel.send(
+            `📉 **RANK DOWNGRADE** 📉\n` +
+            `<@${userId}> dropped from **${oldRank.name}** → **${newRank.name}**.\n` +
+            `They now have **${vouches}** vouches. Stay strong ❤️`
+        );
     }
 }
 
