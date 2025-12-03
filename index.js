@@ -43,8 +43,8 @@ mongoose.connect(process.env.MONGO)
 
 // ---- Backups ----
 const { runBackup } = require("./utils/backup");
-setInterval(() => runBackup(), 1000 * 60 * 60 * 6);
-runBackup();
+setInterval(() => runBackup(client), 1000 * 60 * 60 * 6);
+runBackup(client);
 
 // Backup on shutdown
 process.on("SIGINT", async () => {

@@ -2,9 +2,8 @@ const fs = require("fs");
 const path = require("path");
 const User = require("../models/User");
 const Transaction = require("../models/Transaction");
-const { uploadBackupToDrive } = require("./uploadToDrive");
 
-async function runBackup() {
+async function runBackup(client) {
     try {
         const users = await User.find({});
         const transactions = await Transaction.find({});
@@ -24,16 +23,37 @@ async function runBackup() {
             }))
         };
 
+        // Create folder if doesn't exist
+        const backupFolder = path.join(__dirname, "../backups");
+        if (!fs.existsSync(backupFolder)) {
+            fs.mkdirSync(backupFolder);
+        }
+
+        // File name
         const filename = `backup-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
-        const filepath = path.join(__dirname, "../backups", filename);
+        const filepath = path.join(backupFolder, filename);
 
+        // Write file
         fs.writeFileSync(filepath, JSON.stringify(data, null, 2));
-        console.log(`💾 Local backup saved: ${filename}`);
 
-        await uploadBackupToDrive(filename, filepath);
+        console.log(`💾 Local backup created: ${filename}`);
+
+        // Send to Discord channel
+        const backupChannel = client.channels.cache.get(process.env.BACKUP_CHANNEL_ID);
+        if (!backupChannel) {
+            console.error("❌ Backup channel not found.");
+            return;
+        }
+
+        await backupChannel.send({
+            content: `💾 **New automatic backup created!**\nTimestamp: <t:${Math.floor(Date.now() / 1000)}:F>`,
+            files: [filepath]
+        });
+
+        console.log("📤 Backup uploaded to Discord successfully!");
 
     } catch (err) {
-        console.error("Backup failed:", err);
+        console.error("❌ Backup failed:", err);
     }
 }
 
