@@ -1,6 +1,14 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const User = require("../models/User");
 const { logToStaff } = require("../utils/log");
+const { checkRank } = require("../utils/rankCheck");
+
+dbUser.vouches += amount;
+await dbUser.save();
+
+// Rank update
+checkRank(interaction.client, interaction.guild.id, user.id, dbUser.vouches);
+
 
 module.exports = {
     data: new SlashCommandBuilder()

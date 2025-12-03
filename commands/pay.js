@@ -14,6 +14,8 @@ const {
     getPaySession,
     deletePaySession
 } = require("../utils/paySessions");
+const { checkRank } = require("../utils/rankCheck");
+
 
 module.exports = {
     data: new SlashCommandBuilder()

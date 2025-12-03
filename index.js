@@ -2,6 +2,7 @@ require("dotenv").config();
 const { Client, GatewayIntentBits, Collection, REST, Routes } = require("discord.js");
 const mongoose = require("mongoose");
 const fs = require("fs");
+const { checkRank } = require("./utils/rankCheck");
 
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
@@ -133,6 +134,11 @@ client.on("interactionCreate", async interaction => {
 
         await senderDB.save();
         await recipientDB.save();
+
+        checkRank(interaction.client, interaction.guild.id, senderId, senderDB.vouches);
+        checkRank(interaction.client, interaction.guild.id, recipientId, recipientDB.vouches);
+
+
 
         // SAVE TRANSACTION
         await Transaction.create({
